@@ -6,7 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class SampleAdapter implements EconomyAdapter {
+public class DummyAdapter implements EconomyAdapter {
     @Override
     public boolean hasAccount(UUID uuid) throws ExecutionException {
         if (ThreadLocalRandom.current().nextBoolean()) {

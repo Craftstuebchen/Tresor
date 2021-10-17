@@ -1,5 +1,6 @@
 plugins {
     java
+    id("net.minecrell.plugin-yml.bukkit") version "0.5.0"
 }
 
 group = "org.example"
@@ -48,4 +49,11 @@ tasks {
         useJUnitPlatform()
         jvmArgs(ENABLE_PREVIEW)
     }
+}
+
+bukkit {
+    load = net.minecrell.pluginyml.bukkit.BukkitPluginDescription.PluginLoadOrder.STARTUP
+    main = "com.github.yannicklamprecht.tresor.impl.TresorPlugin"
+    apiVersion = "1.17"
+    authors = listOf("ysl3000")
 }
