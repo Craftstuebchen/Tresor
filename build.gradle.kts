@@ -7,11 +7,14 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://papermc.io/repo/repository/maven-public/") }
 }
 
 dependencies {
-    implementation("org.apache.logging.log4j:log4j-core:2.7")
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.7")
+    compileOnly("io.papermc.paper:paper-api:1.17.1-R0.1-SNAPSHOT")
+
+    implementation("org.apache.logging.log4j:log4j-core:2.14.1")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.14.1")
 
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")

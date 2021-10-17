@@ -1,4 +1,5 @@
-package com.github.yannicklamprecht.tresor.responses;
+package com.github.yannicklamprecht.tresor.api.responses;
+
 
 import java.util.UUID;
 

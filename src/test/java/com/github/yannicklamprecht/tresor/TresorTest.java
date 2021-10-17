@@ -1,7 +1,9 @@
 package com.github.yannicklamprecht.tresor;
 
-import com.github.yannicklamprecht.tresor.responses.Failure;
-import com.github.yannicklamprecht.tresor.responses.Success;
+import com.github.yannicklamprecht.tresor.api.Account;
+import com.github.yannicklamprecht.tresor.api.Tresor;
+import com.github.yannicklamprecht.tresor.api.responses.Failure;
+import com.github.yannicklamprecht.tresor.api.responses.Success;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;

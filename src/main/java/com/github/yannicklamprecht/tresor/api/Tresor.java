@@ -1,6 +1,6 @@
-package com.github.yannicklamprecht.tresor;
+package com.github.yannicklamprecht.tresor.api;
 
-import com.github.yannicklamprecht.tresor.responses.EconomyResponse;
+import com.github.yannicklamprecht.tresor.api.responses.EconomyResponse;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
