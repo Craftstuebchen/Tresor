@@ -8,24 +8,17 @@ import com.github.yannicklamprecht.tresor.api.responses.Success;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadLocalRandom;
 
-public record SampleTresor(Executor asyncExecutor) implements Tresor {
+public record SampleTresor(Executor asyncExecutor, EconomyAdapter adapter) implements Tresor {
 
     @Override
     public CompletableFuture<EconomyResponse<Boolean>> hasAccount(UUID uuid) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                if(ThreadLocalRandom.current().nextBoolean()){
-                    return new Success<>(uuid, ThreadLocalRandom.current().nextBoolean());
-                } else {
-                    throw new ExecutionException("", null);
-                }
-
-            }  catch (ExecutionException e) {
-                return new Failure<>(uuid, "");
+                return new Success<>(uuid, adapter.hasAccount(uuid));
+            } catch (Exception e) {
+                return new Failure<>(uuid, e.getMessage());
             }
         }, asyncExecutor);
     }
@@ -34,13 +27,9 @@ public record SampleTresor(Executor asyncExecutor) implements Tresor {
     public CompletableFuture<EconomyResponse<Account>> getAccount(UUID uuid) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                if(ThreadLocalRandom.current().nextBoolean()){
-                    return new Success<>(uuid, new Account(ThreadLocalRandom.current().nextBoolean(), 300.0));
-                } else {
-                    throw new ExecutionException("", null);
-                }
-            }  catch (ExecutionException e) {
-                return new Failure<>(uuid, "");
+                return new Success<>(uuid, adapter.getAccount(uuid));
+            } catch (Exception e) {
+                return new Failure<>(uuid, e.getMessage());
             }
         }, asyncExecutor);
     }

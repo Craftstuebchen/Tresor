@@ -1,68 +1,171 @@
 package com.github.yannicklamprecht.tresor;
 
 import com.github.yannicklamprecht.tresor.api.Account;
+import com.github.yannicklamprecht.tresor.api.Tresor;
 import com.github.yannicklamprecht.tresor.api.responses.Failure;
 import com.github.yannicklamprecht.tresor.api.responses.Success;
+import com.github.yannicklamprecht.tresor.impl.EconomyAdapter;
 import com.github.yannicklamprecht.tresor.impl.SampleTresor;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 class TresorTest {
 
     private static final Logger logger = LoggerFactory.getLogger(TresorTest.class);
 
+    private EconomyAdapter adapter;
+
+    private final UUID uuid = UUID.randomUUID();
+
+    private Exception exception;
+    private Tresor tresor;
+
+    @BeforeEach
+    void setup() {
+        this.adapter = Mockito.mock(EconomyAdapter.class);
+        this.tresor = new SampleTresor(Runnable::run, adapter);
+        this.exception = new Exception("failed");
+    }
+
     @Test
-    void hasAccountReactive() {
+    void hasAccountReactiveSucceed() throws Exception {
 
-        var tresor = new SampleTresor(Runnable::run);
+        Mockito.doReturn(true).when(adapter).hasAccount(Mockito.eq(uuid));
 
-        tresor.hasAccount(UUID.randomUUID()).whenComplete((response, throwable) -> {
+        tresor.hasAccount(uuid).whenComplete((response, throwable) -> {
 
-            if (response instanceof Failure failure) {
-                System.out.println("Failed with " + failure.message());
-            } else if (response instanceof Success<Boolean> success) {
-                System.out.println("Account " + (success.value() ? "present" : "absent" + "for uuid " + success.passedUUID()));
-            }
+            Assertions.assertTrue(response instanceof Success);
+
+            Success<Boolean> success = (Success<Boolean>) response;
+
+            Assertions.assertTrue(success.value());
         });
     }
 
     @Test
-    void hasAccountBlocking() throws ExecutionException, InterruptedException {
+    void hasAccountReactiveFail() throws Exception {
 
-        var tresor = new SampleTresor(Runnable::run);
+        Mockito.doThrow(exception).when(adapter).hasAccount(Mockito.eq(uuid));
 
-        var response = tresor.hasAccount(UUID.randomUUID()).get();
-        if (response instanceof Failure failure) {
-            System.out.println("Failed with " + failure.message());
-        } else if (response instanceof Success<Boolean> success) {
-            System.out.println("Account " + (success.value() ? "present" : "absent" + "for uuid " + success.passedUUID()));
-        }
+        tresor.hasAccount(uuid).whenComplete((response, throwable) -> {
+
+            Assertions.assertTrue(response instanceof Failure);
+            Failure<Boolean> failure = (Failure<Boolean>) response;
+            Assertions.assertEquals("failed", failure.message());
+            Assertions.assertEquals(uuid, failure.passedUUID());
+        });
+    }
+
+    @Test
+    void hasAccountBlockingSucceed() throws Exception {
+
+        Mockito.doReturn(true).when(adapter).hasAccount(Mockito.eq(uuid));
+
+        var response = tresor.hasAccount(uuid).get();
+
+        Assertions.assertTrue(response instanceof Success);
+
+        Success<Boolean> success = (Success<Boolean>) response;
+
+        Assertions.assertTrue(success.value());
+
+    }
+
+    @Test
+    void hasAccountBlockingFail() throws Exception {
+
+        Mockito.doThrow(exception).when(adapter).hasAccount(Mockito.eq(uuid));
+
+        var response = tresor.hasAccount(uuid).get();
+
+        Assertions.assertTrue(response instanceof Failure);
+        Failure<Boolean> failure = (Failure<Boolean>) response;
+        Assertions.assertEquals("failed", failure.message());
+        Assertions.assertEquals(uuid, failure.passedUUID());
+
     }
 
 
     @Test
-    void getAccountBlocking() throws ExecutionException, InterruptedException {
+    void getAccountBlockingShouldSucceed() throws Exception {
 
-        var tresor = new SampleTresor(Runnable::run);
+        var expectedAccount = new Account(true, 300.0);
 
-        var response = tresor.getAccount(UUID.randomUUID()).get();
+        Mockito.doReturn(expectedAccount).when(adapter).getAccount(Mockito.eq(uuid));
 
-        if (response instanceof Failure failure) {
-            System.out.println("Failed with " + failure.message());
-        } else if (response instanceof Success<Account> success) {
-            var account = success.value();
-            logger.info("""
-                            Active: {},
-                            Overdraft limit: {}
-                            """,
-                    account.active(),
-                    account.overdraftLimit()
-            );
-        }
+        var response = tresor.getAccount(uuid).get();
+
+        Assertions.assertEquals(uuid, response.passedUUID());
+
+        Assertions.assertTrue(response instanceof Success);
+
+        Success<Account> success = (Success<Account>) response;
+
+        var account = success.value();
+
+        Assertions.assertEquals(expectedAccount.active(), account.active());
+        Assertions.assertEquals(expectedAccount.overdraftLimit(), account.overdraftLimit());
     }
+
+    @Test
+    void getAccountBlockingShouldFail() throws Exception {
+
+        Mockito.doThrow(exception).when(adapter).getAccount(Mockito.eq(uuid));
+
+        var response = tresor.getAccount(uuid).get();
+
+        Assertions.assertEquals(uuid, response.passedUUID());
+
+        Assertions.assertTrue(response instanceof Failure);
+
+        Failure<Account> failure = (Failure<Account>) response;
+
+        Assertions.assertEquals("failed", failure.message());
+    }
+
+
+    @Test
+    void getAccountReactiveShouldSucceed() throws Exception {
+
+        var expectedAccount = new Account(true, 300.0);
+
+        Mockito.doReturn(expectedAccount).when(adapter).getAccount(Mockito.eq(uuid));
+
+        tresor.getAccount(uuid).whenComplete((response, throwable) -> {
+            Assertions.assertEquals(uuid, response.passedUUID());
+
+            Assertions.assertTrue(response instanceof Success);
+
+            Success<Account> success = (Success<Account>) response;
+
+            var account = success.value();
+
+            Assertions.assertEquals(expectedAccount.active(), account.active());
+            Assertions.assertEquals(expectedAccount.overdraftLimit(), account.overdraftLimit());
+        });
+    }
+
+    @Test
+    void getAccountReactiveShouldFail() throws Exception {
+
+        Mockito.doThrow(exception).when(adapter).getAccount(Mockito.eq(uuid));
+
+        tresor.getAccount(uuid).whenComplete((response, throwable) -> {
+            Assertions.assertEquals(uuid, response.passedUUID());
+
+            Assertions.assertTrue(response instanceof Failure);
+
+            Failure<Account> failure = (Failure<Account>) response;
+
+            Assertions.assertEquals("failed", failure.message());
+        });
+    }
+
 
 }

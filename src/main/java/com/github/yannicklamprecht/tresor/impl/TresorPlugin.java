@@ -8,7 +8,7 @@ public class TresorPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        var tresor = new SampleTresor((runnable) -> getServer().getScheduler().runTaskAsynchronously(this, runnable));
+        var tresor = new SampleTresor((runnable) -> getServer().getScheduler().runTaskAsynchronously(this, runnable), new SampleAdapter());
 
         getServer().getServicesManager().register(Tresor.class, tresor, this, ServicePriority.High);
     }
