@@ -32,6 +32,16 @@ public record SampleTresor(Executor asyncExecutor) implements Tresor {
 
     @Override
     public CompletableFuture<EconomyResponse<Account>> getAccount(UUID uuid) {
-        return null;
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                if(ThreadLocalRandom.current().nextBoolean()){
+                    return new Success<>(uuid, new Account(ThreadLocalRandom.current().nextBoolean(), 300.0));
+                } else {
+                    throw new ExecutionException("", null);
+                }
+            }  catch (ExecutionException e) {
+                return new Failure<>(uuid, "");
+            }
+        }, asyncExecutor);
     }
 }

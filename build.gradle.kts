@@ -22,23 +22,11 @@ dependencies {
     testImplementation("org.mockito:mockito-core:4.0.0")
 }
 
-tasks.getByName<Test>("test") {
-    useJUnitPlatform()
-}
-
 tasks {
-    val ENABLE_PREVIEW = "--enable-preview"
-
     withType<JavaCompile> {
-        options.compilerArgs.add(ENABLE_PREVIEW)
-        options.compilerArgs.add("-Xlint:preview")
         options.release.set(17)
     }
     withType<Test> {
         useJUnitPlatform()
-        jvmArgs?.plusAssign(ENABLE_PREVIEW)
-    }
-    withType<JavaExec> {
-        jvmArgs?.plusAssign(ENABLE_PREVIEW)
     }
 }
