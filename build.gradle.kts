@@ -22,11 +22,30 @@ dependencies {
     testImplementation("org.mockito:mockito-core:4.0.0")
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 tasks {
-    withType<JavaCompile> {
+    val ENABLE_PREVIEW = "--enable-preview"
+
+    compileJava {
+        options.isIncremental = true
+        options.compilerArgs.add(ENABLE_PREVIEW)
+        options.compilerArgs.add("-Xlint:preview")
         options.release.set(17)
     }
-    withType<Test> {
+
+    compileTestJava {
+        options.compilerArgs.add(ENABLE_PREVIEW)
+        options.compilerArgs.add("-Xlint:preview")
+        options.release.set(17)
+    }
+
+    test {
         useJUnitPlatform()
+        jvmArgs(ENABLE_PREVIEW)
     }
 }

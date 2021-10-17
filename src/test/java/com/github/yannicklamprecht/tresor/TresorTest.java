@@ -168,4 +168,63 @@ class TresorTest {
     }
 
 
+
+
+    @Test
+    void hasAccountReactiveSucceedSwitch() throws Exception {
+
+        Mockito.doReturn(true).when(adapter).hasAccount(Mockito.eq(uuid));
+
+        tresor.hasAccount(uuid).whenComplete((response, throwable) -> {
+            Success<Boolean> successResult = null;
+            Failure<Boolean> failureResult = null;
+            switch (response) {
+                case Success<Boolean> success -> {
+                    successResult = success;
+                }
+                case Failure<Boolean> failure -> {
+                    failureResult = failure;
+                }
+            }
+
+            Assertions.assertNotNull(successResult);
+            Assertions.assertNull(failureResult);
+
+            Assertions.assertTrue(response instanceof Success);
+
+            Success<Boolean> success = (Success<Boolean>) response;
+
+            Assertions.assertTrue(success.value());
+        });
+    }
+
+    @Test
+    void hasAccountReactiveFailSwitch() throws Exception {
+
+        Mockito.doThrow(exception).when(adapter).hasAccount(Mockito.eq(uuid));
+
+        tresor.hasAccount(uuid).whenComplete((response, throwable) -> {
+
+            Success<Boolean> successResult = null;
+            Failure<Boolean> failureResult = null;
+            switch (response) {
+                case Success<Boolean> success -> {
+                    successResult = success;
+                }
+                case Failure<Boolean> failure -> {
+                    failureResult = failure;
+                }
+            }
+
+            Assertions.assertNull(successResult);
+            Assertions.assertNotNull(failureResult);
+
+            Assertions.assertTrue(response instanceof Failure);
+            Failure<Boolean> failure = (Failure<Boolean>) response;
+            Assertions.assertEquals("failed", failure.message());
+            Assertions.assertEquals(uuid, failure.passedUUID());
+        });
+    }
+
+
 }
